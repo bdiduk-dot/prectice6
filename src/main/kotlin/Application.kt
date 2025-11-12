@@ -6,19 +6,37 @@ import io.ktor.server.netty.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.http.content.*
+import io.ktor.http.*
+import io.ktor.server.plugins.statuspages.*
 
 fun main(args: Array<String>) {
     EngineMain.main(args)
 }
 
 fun Application.module() {
+
+    install(StatusPages) {
+        exception<IllegalStateException> { call, cause ->
+            call.respondText("App in illegal state as ${cause.message}")
+        }
+    }
+
     routing {
-        // Главная страница
+
         get("/") {
-            call.respondText("Hello world!")
+            call.respondText("Hello World!")
         }
 
-        // Подключение HTML
+        get("/test1") {
+            val text = "<h1>Hello From Ktor</h1>"
+            val type = ContentType.parse("text/html")
+            call.respondText(text, type)
+        }
+
+        get("/error-test") {
+            throw IllegalStateException("Too Busy")
+        }
+
         static("/content") {
             resources("content")
         }
